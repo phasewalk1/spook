@@ -21,5 +21,5 @@ uv tool install .
 
 **Happy Hunting**!
 ```shell
-spook -h
+spook -i
 ```

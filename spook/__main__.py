@@ -10,6 +10,8 @@ import typer
 import spook.candy as candy
 from spook.modes import Mode
 
+VERSION = "0.1.0-alpha"
+
 logger.remove()
 logger.add(
     sys.stderr,
@@ -19,7 +21,10 @@ logger.add(
 )
 
 console = Console()
-app = typer.Typer(add_completion=False)
+app = typer.Typer(
+    add_completion=True, 
+    context_settings={"help_option_names": ["-h", "--help"]}
+)
 
 
 @app.command()
@@ -131,12 +136,33 @@ def interactive():
 
 
 @app.callback(invoke_without_command=True)
-def main(ctx: typer.Context):
+def main(
+    ctx: typer.Context,
+    version: bool = typer.Option(
+        False, 
+        "--version", 
+        "-v",
+        help="Show version and exit"
+    ),
+    inter: bool = typer.Option(
+        False,
+        "--interactive",
+        "-i",
+        help="Start in interactive mode",
+    )
+ ):
     """spook - A collection of red-teaming tools, scripts, and workflows."""
-    if ctx.invoked_subcommand is None:
+
+    if ctx.invoked_subcommand is None and not (version or inter):
+        typer.echo(ctx.get_help())
+    elif inter:
         candy.show_banner(console)
         candy.show_modes_table(console)
         interactive()
+        raise typer.Exit()
+    elif version:
+        console.print(f"[bold green]Spook Version:[/bold green] {VERSION}")
+        raise typer.Exit()
     elif ctx.invoked_subcommand == "recon":
         logger.info("Recon mode selected from main callback")
     elif ctx.invoked_subcommand == "expl":
